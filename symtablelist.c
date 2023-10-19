@@ -53,7 +53,7 @@ int SymTable_put(SymTable_T oSymTable, const char *pcKey,
                  const void *pvValue){
    assert(oSymTable != NULL);
    assert(pcKey != NULL);
-   
+
    if(!SymTable_contains(oSymTable, pcKey)){
       struct StackNode *psNewNode;
       char *pcKeySave;
@@ -64,7 +64,7 @@ int SymTable_put(SymTable_T oSymTable, const char *pcKey,
       if (pcKeySave == NULL)
          return 0;
       pcKeySave = strcpy(pcKeySave, pcKey);
-      
+
       psNewNode->pvValue = pvValue;
       psNewNode->pcKey = pcKeySave;
       psNewNode->psNextNode = oSymTable->psFirstNode;
@@ -79,20 +79,20 @@ void *SymTable_replace(SymTable_T oSymTable, const char *pcKey,
                        const void *pvValue){
    struct StackNode *psCurrentNode;
    struct StackNode *psNextNode;
-   
+
    assert(oSymTable != NULL);
    assert(pcKey != NULL);
-   
+
    for (psCurrentNode = oSymTable->psFirstNode;
         psCurrentNode != NULL;
         psCurrentNode = psNextNode) {
-      
-      if (psCurrentNode->pcKey == pcKey) {
-          const void *pvValueSave = psCurrentNode->pvValue;
-          psCurrentNode->pvValue = pvValue;
-          return (void*)pvValueSave;
+
+      if (strcmp(psCurrentNode->pcKey, pcKey) == 0) {
+         const void *pvValueSave = psCurrentNode->pvValue;
+         psCurrentNode->pvValue = pvValue;
+         return (void*)pvValueSave;
       }
-      
+
       psNextNode = psCurrentNode->psNextNode;
    }
    return NULL;
@@ -104,12 +104,12 @@ int SymTable_contains(SymTable_T oSymTable, const char *pcKey){
 
    assert(oSymTable != NULL);
    assert(pcKey != NULL);
-   
+
    for (psCurrentNode = oSymTable->psFirstNode;
         psCurrentNode != NULL;
         psCurrentNode = psNextNode) {
-      if (psCurrentNode->pcKey == pcKey)
-         return 1; 
+      if (strcmp(psCurrentNode->pcKey, pcKey) == 0)
+         return 1;
       psNextNode = psCurrentNode->psNextNode;
    }
    return 0;
@@ -121,12 +121,12 @@ void *SymTable_get(SymTable_T oSymTable, const char *pcKey){
 
    assert(oSymTable != NULL);
    assert(pcKey != NULL);
-   
+
    for (psCurrentNode = oSymTable->psFirstNode;
         psCurrentNode != NULL;
         psCurrentNode = psNextNode) {
-      if (psCurrentNode->pcKey == pcKey)
-         return (void*)psCurrentNode->pvValue; 
+      if (strcmp(psCurrentNode->pcKey, pcKey) == 0)
+         return (void*)psCurrentNode->pvValue;
       psNextNode = psCurrentNode->psNextNode;
    }
    return NULL;
@@ -135,22 +135,31 @@ void *SymTable_get(SymTable_T oSymTable, const char *pcKey){
 void *SymTable_remove(SymTable_T oSymTable, const char *pcKey){
    struct StackNode *psCurrentNode;
    struct StackNode *psNextNode;
+   struct StackNode *psPreviousNode;
+   const void *nodeValue;
 
    assert(oSymTable != NULL);
    assert(pcKey != NULL);
-   
+
+   psPreviousNode = NULL;
+
    for (psCurrentNode = oSymTable->psFirstNode;
-        psCurrentNode->psNextNode != NULL;
+        psCurrentNode != NULL;
         psCurrentNode = psNextNode) {
-      
-      if (psCurrentNode->psNextNode->pcKey == pcKey) {
-         struct StackNode *pvSave = psCurrentNode->psNextNode;
-         const void *pvSaveValue  = pvSave->pvValue;
-         psCurrentNode->psNextNode = pvSave->psNextNode;
-         free(pvSave);
-         return (void*)pvSaveValue;
+
+      if (strcmp(psCurrentNode->pcKey, pcKey) == 0) {
+         if (psPreviousNode == NULL) {
+            oSymTable->psFirstNode = psCurrentNode->psNextNode;
+         }
+         else {
+            psPreviousNode->psNextNode = psCurrentNode->psNextNode;
+         }
+         nodeValue = psCurrentNode->pvValue;
+         free(psCurrentNode);
+         oSymTable->values--;
+         return (void*)nodeValue;
       }
-      
+
       psNextNode = psCurrentNode->psNextNode;
    }
    return NULL;
@@ -162,17 +171,17 @@ void SymTable_map(SymTable_T oSymTable,
                   const void *pvExtra){
    struct StackNode *psCurrentNode;
    struct StackNode *psNextNode;
-   
+
    assert(oSymTable != NULL);
-   assert(pfApply != NULL); 
-   
+   assert(pfApply != NULL);
+
    for (psCurrentNode = oSymTable->psFirstNode;
         psCurrentNode != NULL;
         psCurrentNode = psNextNode) {
 
       pfApply(psCurrentNode->pcKey,(void*)psCurrentNode->pvValue,
               (void*)pvExtra);
-      
+
       psNextNode = psCurrentNode->psNextNode;
    }
 }
