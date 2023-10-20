@@ -159,7 +159,7 @@ void *SymTable_remove(SymTable_T oSymTable, const char *pcKey){
          oSymTable->values--;
          return (void*)nodeValue;
       }
-
+      psPreviousNode = psCurrentNode;
       psNextNode = psCurrentNode->psNextNode;
    }
    return NULL;
@@ -179,8 +179,10 @@ void SymTable_map(SymTable_T oSymTable,
         psCurrentNode != NULL;
         psCurrentNode = psNextNode) {
 
+
       pfApply(psCurrentNode->pcKey,(void*)psCurrentNode->pvValue,
               (void*)pvExtra);
+
 
       psNextNode = psCurrentNode->psNextNode;
    }
