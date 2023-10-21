@@ -48,7 +48,7 @@ static SymTable_T SymTable_resize(SymTable_T oSymTable) {
       return oSymTable;
 
 
-   newSize = bucketArray[oSymTable->bucketIndex + 1];
+   newSize = bucketArray[++oSymTable->bucketIndex];
 
    newBucket = (struct StackNode**)
       malloc(newSize * sizeof(struct StackNode));
@@ -61,7 +61,6 @@ static SymTable_T SymTable_resize(SymTable_T oSymTable) {
    }
 
    for (i = 0; i < oSymTable->size; i++) {
-      struct StackNode *currentIndex = oSymTable->bucket[i];
       size_t hash;
       struct StackNode *psCurrentNode;
       struct StackNode *psNextNode;
@@ -71,9 +70,10 @@ static SymTable_T SymTable_resize(SymTable_T oSymTable) {
         psCurrentNode = psNextNode) {
 
          hash = SymTable_hash(psCurrentNode->pcKey, newSize);
-         currentIndex->psNextNode = newBucket[hash];
-         newBucket[hash] = currentIndex;
          psNextNode = psCurrentNode->psNextNode;
+
+         psCurrentNode->psNextNode = newBucket[hash];
+         newBucket[hash] = psCurrentNode;
       }
    }
    
@@ -150,9 +150,12 @@ int SymTable_put(SymTable_T oSymTable, const char *pcKey,
       pcKeySave = strcpy(pcKeySave, pcKey);
       oSymTable->values++;
 
+      
       if ((int) oSymTable->values > oSymTable->size){
+
          oSymTable = SymTable_resize(oSymTable);
       }
+      
       hash = SymTable_hash(pcKey, oSymTable->size);
 
       psNewNode->pvValue = pvValue;
@@ -280,21 +283,23 @@ void SymTable_map(SymTable_T oSymTable,
                   const void *pvExtra){
    struct StackNode *psCurrentNode;
    struct StackNode *psNextNode;
-   size_t hash;
+   int i;
 
 
    assert(oSymTable != NULL);
    assert(pfApply != NULL);
 
-   for (psCurrentNode = oSymTable->bucket[0];
-        psCurrentNode != NULL;
-        psCurrentNode = psNextNode) {
+   for (i = 0; i < oSymTable->size; i++) {
+         for (psCurrentNode = oSymTable->bucket[i];
+              psCurrentNode != NULL;
+              psCurrentNode = psNextNode) {
 
 
-      pfApply(psCurrentNode->pcKey,(void*)psCurrentNode->pvValue,
-              (void*)pvExtra);
+            pfApply(psCurrentNode->pcKey,(void*)psCurrentNode->pvValue,
+                    (void*)pvExtra);
 
 
-      psNextNode = psCurrentNode->psNextNode;
-   }
+            psNextNode = psCurrentNode->psNextNode;
+         }
+    }
 }
