@@ -2,7 +2,7 @@ Assignment 3 readme File
 
 ------------------------------------------------------------------------
 What is your name?
-
+Ethan Puckett
 
 
 ------------------------------------------------------------------------
@@ -25,12 +25,13 @@ may trigger a course penalty, and depending on the nature of the
 interaction, may additionally require the interaction being reported
 to the Committee on Discipline. Write "None" if you used no
 unauthorized sources of information.
-
+None
 
 
 ------------------------------------------------------------------------
 What is your assessment of the assignment? Was it helpful? Was it fun?
-
+This assignment was helpful in understanding more about
+memory management in C.
 
 
 ------------------------------------------------------------------------
@@ -45,6 +46,7 @@ What warnings does splint generate on symtablelist.c, and what are your
 disagreements with them? Copy the splint warnings here, and express your
 disagreement after each warning. If there are no warnings, then write
 "None."
+None
 
 
 
@@ -53,7 +55,17 @@ What warnings does critTer generate on symtablelist.c, and what are your
 disagreements with them? Copy the critTer warnings here, and express
 your disagreement after each warning. If there are no warnings, then
 write "None."
+symtablelist.c line 87: medium priority:
+Do you want to validate 'pvValue' through an assert?
+I dissagree with this warning becuase pvValue can be NULL
 
+symtablelist.c line 140: medium priority:
+Do you want to validate 'pvValue' through an assert?
+I dissagree with this warning becuase pvValue can be NULL
+
+symtablelist.c line 266: medium priority:
+Do you want to validate 'pvExtra' through an assert?
+I dissagree with this warning becuase pvExtra can be NULL
 
 
 ------------------------------------------------------------------------
@@ -61,7 +73,12 @@ What warnings does splint generate on symtablehash.c, and what are your
 disagreements with them? Copy the splint warnings here, and express your
 disagreement after each warning. If there are no warnings, then write
 "None."
-
+symtablehash.c: (in function SymTable_resize)
+symtablehash.c:119:44 Value newBucket[] used before definition
+An rvalue is used that may not be initialized to a value on some
+execution path (Use -usedef to inhibit warning).
+I dissagree with warning because newBucket is initialized for each
+index within a for loop above the call
 
 
 ------------------------------------------------------------------------
@@ -69,7 +86,17 @@ What warnings does critTer generate on symtablehash.c, and what are your
 disagreements with them? Copy the critTer warnings here, and express
 your disagreement after each warning. If there are no warnings, then
 write "None."
+symtablelist.c line 211: medium priority:
+Do you want to validate 'pvValue' through an assert?
+I dissagree with this warning becuase pvValue can be NULL
 
+symtablelist.c line 277: medium priority:
+Do you want to validate 'pvValue' through an assert?
+I dissagree with this warning becuase pvValue can be NULL
+
+symtablelist.c line 423: medium priority:
+Do you want to validate 'pvExtra' through an assert?
+I dissagree with this warning becuase pvExtra can be NULL
 
 
 ------------------------------------------------------------------------

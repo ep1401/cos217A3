@@ -117,6 +117,8 @@ static SymTable_T SymTable_resize(SymTable_T oSymTable) {
 
          /* adds the current binding to the new correct bucket */
          psCurrentBinding->psNextBinding = newBucket[hash];
+
+         /*  */
          newBucket[hash] = psCurrentBinding;
       }
    }
