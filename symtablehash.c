@@ -14,7 +14,7 @@ static const size_t bucketArray[] = {509, 1021, 2039, 4093, 8191,
 static const size_t numBucketCounts =
    sizeof(bucketArray)/sizeof(bucketArray[0]);
 
-/* Each item is stored in a Binding.  
+/* Each item is stored in a Binding.
    Bindings are linked to form a Table*/
 struct Binding {
    /* stores the value of the binding */
@@ -29,8 +29,8 @@ struct Binding {
 
 /* Table is a structure that contains a pointer to a pointer
    allowing access to all of the Bindings
-   within the Table. It also stores the number of 
-   elements contained within the Table and the 
+   within the Table. It also stores the number of
+   elements contained within the Table and the
    index to bucketArray that represents the bucket size */
 struct Table {
    /* The number of elements contained within
@@ -44,12 +44,12 @@ struct Table {
    int bucketIndex;
 };
 
-/* Hash function ensuring that bindings inserted in the table 
+/* Hash function ensuring that bindings inserted in the table
    are evenely distrubeted throughout the buckets. The function
    takes in a key, pcKey, as a const char and finds the appropriate
    bucket to insert the pcKey in. The bucket that pcKey is inserted
-   within is determined through calculation with the 
-   input uBucketCount of type size_t. It returns a hash code for 
+   within is determined through calculation with the
+   input uBucketCount of type size_t. It returns a hash code for
    pcKey that is between 0 and uBucketCount - 1 inclusive. */
 static size_t SymTable_hash(const char *pcKey, size_t uBucketCount) {
    const size_t HASH_MULTIPLIER = 65599;
@@ -66,10 +66,10 @@ static size_t SymTable_hash(const char *pcKey, size_t uBucketCount) {
    return uHash % uBucketCount;
 }
 
-/* Takes in an SymTable_T as input, oSymTable that will be 
-   modified to increase in size. The new size will be 
-   equal to the value located in the next index of 
-   bucketArray. oSymTable will be modified to include the 
+/* Takes in an SymTable_T as input, oSymTable that will be
+   modified to increase in size. The new size will be
+   equal to the value located in the next index of
+   bucketArray. oSymTable will be modified to include the
    new buckets with all of its previous bindings being
    rehashed. this modified oSymTable will be returned */
 static SymTable_T SymTable_resize(SymTable_T oSymTable) {
@@ -84,11 +84,20 @@ static SymTable_T SymTable_resize(SymTable_T oSymTable) {
    /* ensures no null input */
    assert(oSymTable != NULL);
 
+   /* ensures that the bucketArray is not indexed out of its bounds.
+      While this is checked within the SymTable_put function it is
+      beneficial to also include here to ensure that we
+      do not try to access an array index that we do not have. */
+   if ((size_t)oSymTable->bucketIndex == numBucketCounts - 1) {
+      return oSymTable;
+   }
+
+
    /* gets the new size of the oSymTable and increments
       bucketIndex to be the index of the new size */
    newSize = bucketArray[++oSymTable->bucketIndex];
 
-   /* intilizes the size of newBucket to fit the 
+   /* intilizes the size of newBucket to fit the
       the new number of buckets */
    newBucket = (struct Binding**)
       malloc(newSize * sizeof(struct Binding));
@@ -103,22 +112,25 @@ static SymTable_T SymTable_resize(SymTable_T oSymTable) {
       newBucket[i] = NULL;
    }
 
-   /* iterates through oSymTable until the end is reached */
+   /* iterates through oSymTable until the end is reached. Need
+      to subtract one because bucketIndex has alread been
+      incrmented */
    for (i = 0; i < bucketArray[oSymTable->bucketIndex - 1]; i++) {
       for (psCurrentBinding = oSymTable->buckets[i];
-        psCurrentBinding != NULL;
-        psCurrentBinding = psNextBinding) {
+           psCurrentBinding != NULL;
+           psCurrentBinding = psNextBinding) {
 
          /* determines the new hash value of each binding */
          hash = SymTable_hash(psCurrentBinding->pcKey, newSize);
 
          /* maintains access to the next binding */
-         psNextBinding = psCurrentBinding->psNextBinding; 
+         psNextBinding = psCurrentBinding->psNextBinding;
 
          /* adds the current binding to the new correct bucket */
          psCurrentBinding->psNextBinding = newBucket[hash];
 
-         /*  */
+         /* puts the current binding at the start of the list
+            of the hashed bucket */
          newBucket[hash] = psCurrentBinding;
       }
    }
@@ -137,7 +149,7 @@ SymTable_T SymTable_new(void){
    /* for loop variable */
    size_t i;
 
-   /* intilizes the size of oSymTable to be the same size as 
+   /* intilizes the size of oSymTable to be the same size as
       the Table struct */
    oSymTable = (SymTable_T)malloc(sizeof(struct Table));
 
@@ -153,7 +165,7 @@ SymTable_T SymTable_new(void){
       the starting bucket size */
    oSymTable->bucketIndex = 0;
 
-   /* intilizes the size of oSymTable->buckets to fit the 
+   /* intilizes the size of oSymTable->buckets to fit the
       the intial number of buckets */
    oSymTable->buckets = (struct Binding**)
       malloc(bucketArray[0] * sizeof(struct Binding));
@@ -225,7 +237,7 @@ int SymTable_put(SymTable_T oSymTable, const char *pcKey,
       /* checks to see if malloc failed */
       if (psNewBinding == NULL)
          /* returns 0 representing that their was
-         insufficeint memory */
+            insufficeint memory */
          return 0;
 
       /* allocates memory for which the defensive key will reside */
@@ -234,7 +246,7 @@ int SymTable_put(SymTable_T oSymTable, const char *pcKey,
       /* checks to see if malloc failed */
       if (pcKeySave == NULL)
          /* returns 0 representing that their was
-         insufficeint memory */
+            insufficeint memory */
          return 0;
 
       /* copies the key into allocated memory allowing a
@@ -245,14 +257,17 @@ int SymTable_put(SymTable_T oSymTable, const char *pcKey,
       oSymTable->tableInputs++;
 
 
-      /* checks if oSymtable needs to be resized */
+      /* checks if oSymtable needs to be resized. This also checks to
+         see if we have reached the max number of buckets
+         preventing resized from being called for every binding
+         inserted after the table has already reached its max length */
       if ((oSymTable->tableInputs
            > bucketArray[oSymTable->bucketIndex])
           && ((size_t)oSymTable->bucketIndex != numBucketCounts - 1)){
          oSymTable = SymTable_resize(oSymTable);
       }
 
-      /* calculates the hash value to determine which bucket 
+      /* calculates the hash value to determine which bucket
          the binding will be inserted in */
       hash = SymTable_hash(pcKey,
                            bucketArray[oSymTable->bucketIndex]);
@@ -261,11 +276,11 @@ int SymTable_put(SymTable_T oSymTable, const char *pcKey,
       psNewBinding->pvValue = pvValue;
       psNewBinding->pcKey = pcKeySave;
 
-      /* sets the first binding within the oSymTable bucket 
+      /* sets the first binding within the oSymTable bucket
          to be the binding  just created */
       psNewBinding->psNextBinding = oSymTable->buckets[hash];
       oSymTable->buckets[hash] = psNewBinding;
-      
+
       return 1;
    }
    /* returns 0 representing that pcKey was already found within
@@ -282,7 +297,7 @@ void *SymTable_replace(SymTable_T oSymTable, const char *pcKey,
    assert(oSymTable != NULL);
    assert(pcKey != NULL);
 
-   /* calculates the hash value to determine which bucket 
+   /* calculates the hash value to determine which bucket
       to search within */
    hash = SymTable_hash(pcKey, bucketArray[oSymTable->bucketIndex]);
 
@@ -291,7 +306,7 @@ void *SymTable_replace(SymTable_T oSymTable, const char *pcKey,
    for (psCurrentBinding = oSymTable->buckets[hash];
         psCurrentBinding != NULL;
         psCurrentBinding = psCurrentBinding->psNextBinding) {
-      /* checks if the inputed pcKey is equal to the pcKey within 
+      /* checks if the inputed pcKey is equal to the pcKey within
          the bounding */
       if (strcmp(psCurrentBinding->pcKey, pcKey) == 0) {
          /* replaces the binding's value with pvValue */
@@ -313,7 +328,7 @@ int SymTable_contains(SymTable_T oSymTable, const char *pcKey){
    assert(oSymTable != NULL);
    assert(pcKey != NULL);
 
-   /* calculates the hash value to determine which bucket 
+   /* calculates the hash value to determine which bucket
       to search within */
    hash = SymTable_hash(pcKey, bucketArray[oSymTable->bucketIndex]);
 
@@ -322,7 +337,7 @@ int SymTable_contains(SymTable_T oSymTable, const char *pcKey){
    for (psCurrentBinding = oSymTable->buckets[hash];
         psCurrentBinding != NULL;
         psCurrentBinding = psCurrentBinding->psNextBinding) {
-      /* checks if the inputed pcKey is equal to the pcKey within 
+      /* checks if the inputed pcKey is equal to the pcKey within
          the bounding */
       if (strcmp(psCurrentBinding->pcKey, pcKey) == 0)
          /* returns 1 representing that pcKey was found */
@@ -341,7 +356,7 @@ void *SymTable_get(SymTable_T oSymTable, const char *pcKey){
    assert(oSymTable != NULL);
    assert(pcKey != NULL);
 
-   /* calculates the hash value to determine which bucket 
+   /* calculates the hash value to determine which bucket
       to search within */
    hash = SymTable_hash(pcKey, bucketArray[oSymTable->bucketIndex]);
 
@@ -350,7 +365,7 @@ void *SymTable_get(SymTable_T oSymTable, const char *pcKey){
    for (psCurrentBinding = oSymTable->buckets[hash];
         psCurrentBinding != NULL;
         psCurrentBinding = psCurrentBinding->psNextBinding) {
-      /* checks if the inputed pcKey is equal to the pcKey within 
+      /* checks if the inputed pcKey is equal to the pcKey within
          the bounding */
       if (strcmp(psCurrentBinding->pcKey, pcKey) == 0)
          /* returns the binding of the binding whose key is pcKey */
@@ -369,7 +384,7 @@ void *SymTable_remove(SymTable_T oSymTable, const char *pcKey){
    assert(oSymTable != NULL);
    assert(pcKey != NULL);
 
-   /* calculates the hash value to determine which bucket 
+   /* calculates the hash value to determine which bucket
       to search within */
    hash = SymTable_hash(pcKey, bucketArray[oSymTable->bucketIndex]);
 
@@ -380,16 +395,16 @@ void *SymTable_remove(SymTable_T oSymTable, const char *pcKey){
    for (psCurrentBinding = oSymTable->buckets[hash];
         psCurrentBinding != NULL;
         psCurrentBinding = psCurrentBinding->psNextBinding) {
-      /* checks if the inputed pcKey is equal to the pcKey within 
+      /* checks if the inputed pcKey is equal to the pcKey within
          the bounding */
       if (strcmp(psCurrentBinding->pcKey, pcKey) == 0) {
          const void *bindingValue;
 
-         /* checks to see if the previous binding is NULL 
+         /* checks to see if the previous binding is NULL
             representing that this is the first binding
             in oSymTable */
          if (psPreviousBinding == NULL) {
-            /* updates the first binding withing oSymTable to 
+            /* updates the first binding withing oSymTable to
                be the one immediately following the first*/
             oSymTable->buckets[hash]
                = psCurrentBinding->psNextBinding;
@@ -409,7 +424,7 @@ void *SymTable_remove(SymTable_T oSymTable, const char *pcKey){
          /* frees all memory within the current binding */
          free((void *)psCurrentBinding->pcKey);
          free(psCurrentBinding);
-         
+
          return (void*)bindingValue;
       }
       psPreviousBinding = psCurrentBinding;
@@ -431,14 +446,14 @@ void SymTable_map(SymTable_T oSymTable,
 
    /* iterates through oSymTable until the end is reached */
    for (i = 0; i <  bucketArray[oSymTable->bucketIndex]; i++) {
-         for (psCurrentBinding = oSymTable->buckets[i];
-              psCurrentBinding != NULL;
-              psCurrentBinding = psCurrentBinding->psNextBinding) {
-            /* applies function *pfApply to each binding in
-               oSymtable passing pvExtra as an extra parameter*/
-            (*pfApply)(psCurrentBinding->pcKey,
+      for (psCurrentBinding = oSymTable->buckets[i];
+           psCurrentBinding != NULL;
+           psCurrentBinding = psCurrentBinding->psNextBinding) {
+         /* applies function *pfApply to each binding in
+            oSymtable passing pvExtra as an extra parameter*/
+         (*pfApply)(psCurrentBinding->pcKey,
                     (void*)psCurrentBinding->pvValue,
                     (void*)pvExtra);
-         }
-    }
+      }
+   }
 }

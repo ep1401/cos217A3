@@ -799,7 +799,7 @@ static void testLargeTable(int iBindingCount)
    printf("------------------------------------------------------\n");
    printf("Testing a potentially large SymTable object.\n");
    printf("No output except CPU time consumed should appear here:\n");
-   fflush(stdout);
+   fflush(stdout); 
 
    /* Note the current time. */
    iInitialClock = clock();
@@ -849,6 +849,7 @@ static void testLargeTable(int iBindingCount)
       ASSURE((pcValue != NULL) && (strcmp(pcValue, acKey) == 0));
       iLarge--;
    }
+   
    /* Get the middle binding -- if there is one. */
    if (iSmall == iLarge)
    {
@@ -857,6 +858,7 @@ static void testLargeTable(int iBindingCount)
       ASSURE(pcValue != NULL);
       ASSURE((pcValue != NULL) && (strcmp(pcValue, acKey) == 0));
    }
+   
 
    /* Remove each binding. Also free each binding's value. */
    iSmall = 0;
@@ -884,6 +886,7 @@ static void testLargeTable(int iBindingCount)
       ASSURE(uLength2 == uLength);
       iLarge--;
    }
+
    /* Remove the middle binding -- if there is one. */
    if (iSmall == iLarge)
    {

@@ -1,4 +1,5 @@
-Assignment 3 readme File
+
+0;136;0cAssignment 3 readme File
 
 ------------------------------------------------------------------------
 What is your name?
@@ -11,6 +12,18 @@ assignment? COPY THE LIST of authorized sources of information given
 in the "Policies" web page (also available on armlab in the file
 ~cos217/AuthorizedSourcesList ) to this section of the readme file,
 and edit it as appropriate.
+The course's lectures
+The course's precepts
+The course's website
+Documents that are referenced directly by the course's website
+The course's textbook
+The man pages on the armlab cluster
+The course's current staff members outside of class time through office
+hours
+The course's current staff members outside of class time through
+meetings
+The course's current staff members outside of class time through Ed
+Current Intro Lab TAs through visits to the Intro COS Lab
 
 
 
@@ -106,22 +119,22 @@ implementation, (2) your non-expanding hash table implementation, and
 (3) your expanding hash table implementation? Fill in the blanks.
 
 The linked list implementation with:
--- 50 bindings consumed ________ seconds.
--- 500 bindings consumed ________ seconds.
--- 5000 bindings consumed ________ seconds.
--- 50000 bindings consumed ________ seconds.
--- 500000 bindings consumed ________ seconds.
+-- 50 bindings consumed 0.000000 seconds.
+-- 500 bindings consumed 0.009807 seconds.
+-- 5000 bindings consumed 1.084833 seconds.
+-- 50000 bindings consumed 108.737971 seconds.
+-- 500000 bindings consumed more than 5 minutes seconds.
 
 The non-expanding hash table implementation with:
--- 50 bindings consumed ________ seconds.
--- 500 bindings consumed ________ seconds.
--- 5000 bindings consumed ________ seconds.
--- 50000 bindings consumed ________ seconds.
--- 500000 bindings consumed ________ seconds.
+-- 50 bindings consumed 0.000000 seconds.
+-- 500 bindings consumed 0.000000 seconds.
+-- 5000 bindings consumed 0.014781 seconds.
+-- 50000 bindings consumed 0.439478 seconds.
+-- 500000 bindings consumed 79.186600 seconds.
 
 The expanding hash table implementation with:
--- 50 bindings consumed ________ seconds.
--- 500 bindings consumed ________ seconds.
--- 5000 bindings consumed ________ seconds.
--- 50000 bindings consumed ________ seconds.
--- 500000 bindings consumed ________ seconds.
+-- 50 bindings consumed 0.000000 seconds.
+-- 500 bindings consumed 0.000000 seconds.
+-- 5000 bindings consumed 0.011536 seconds.
+-- 50000 bindings consumed 0.132679 seconds.
+-- 500000 bindings consumed 1.745617 seconds.
