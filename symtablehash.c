@@ -46,10 +46,10 @@ struct Table {
 
 /* Hash function ensuring that bindings inserted in the table
    are evenely distrubeted throughout the buckets. The function
-   takes in a key, pcKey, as a const char and finds the appropriate
+   takes in a key, pcKey, and finds the appropriate
    bucket to insert the pcKey in. The bucket that pcKey is inserted
    within is determined through calculation with the
-   input uBucketCount of type size_t. It returns a hash code for
+   input uBucketCount. It returns a hash code of type size_t for
    pcKey that is between 0 and uBucketCount - 1 inclusive. */
 static size_t SymTable_hash(const char *pcKey, size_t uBucketCount) {
    const size_t HASH_MULTIPLIER = 65599;
@@ -66,12 +66,12 @@ static size_t SymTable_hash(const char *pcKey, size_t uBucketCount) {
    return uHash % uBucketCount;
 }
 
-/* Takes in an SymTable_T as input, oSymTable that will be
+/* Takes in an SymTable_T as input, oSymTable, that will be
    modified to increase in size. The new size will be
-   equal to the value located in the next index of
+   equal to the value located in the next increased index of
    bucketArray. oSymTable will be modified to include the
    new buckets with all of its previous bindings being
-   rehashed. this modified oSymTable will be returned */
+   rehashed. This modified oSymTable will be returned */
 static SymTable_T SymTable_resize(SymTable_T oSymTable) {
    struct Binding **newBucket;
    struct Binding *psCurrentBinding;
@@ -79,6 +79,7 @@ static SymTable_T SymTable_resize(SymTable_T oSymTable) {
    size_t hash;
    /* for loop variable */
    size_t i;
+
    size_t newSize;
 
    /* ensures no null input */
@@ -92,25 +93,18 @@ static SymTable_T SymTable_resize(SymTable_T oSymTable) {
       return oSymTable;
    }
 
-
    /* gets the new size of the oSymTable and increments
       bucketIndex to be the index of the new size */
    newSize = bucketArray[++oSymTable->bucketIndex];
 
    /* intilizes the size of newBucket to fit the
-      the new number of buckets */
+      the new number of buckets and sets all bindings to NULL */
    newBucket = (struct Binding**)
-      malloc(newSize * sizeof(struct Binding));
+      calloc(newSize, sizeof(struct Binding*));
 
-   /* checks to see if malloc failed */
+   /* checks to see if calloc failed */
    if (newBucket == NULL)
       return NULL;
-
-   /* sets the bindings to be NULL intially representing
-      an empty SymTable_T */
-   for (i = 0; i < newSize; i++) {
-      newBucket[i] = NULL;
-   }
 
    /* iterates through oSymTable until the end is reached. Need
       to subtract one because bucketIndex has alread been
@@ -146,8 +140,6 @@ static SymTable_T SymTable_resize(SymTable_T oSymTable) {
 
 SymTable_T SymTable_new(void){
    SymTable_T oSymTable;
-   /* for loop variable */
-   size_t i;
 
    /* intilizes the size of oSymTable to be the same size as
       the Table struct */
@@ -166,19 +158,13 @@ SymTable_T SymTable_new(void){
    oSymTable->bucketIndex = 0;
 
    /* intilizes the size of oSymTable->buckets to fit the
-      the intial number of buckets */
+      the intial number of buckets and sets all bindings to NULL */
    oSymTable->buckets = (struct Binding**)
-      malloc(bucketArray[0] * sizeof(struct Binding));
+      calloc(bucketArray[0], sizeof(struct Binding*));
 
-   /* checks to see if malloc failed */
+   /* checks to see if calloc failed */
    if (oSymTable->buckets == NULL)
       return NULL;
-
-   /* sets the bindings to be NULL intially representing
-      an empty SymTable_T */
-   for (i = 0; i < bucketArray[0]; i++) {
-      oSymTable->buckets[i] = NULL;
-   }
 
    return oSymTable;
 }
@@ -221,71 +207,72 @@ size_t SymTable_getLength(SymTable_T oSymTable){
 
 int SymTable_put(SymTable_T oSymTable, const char *pcKey,
                  const void *pvValue) {
-   /* ensures no null input where unexpected */
+   struct Binding *psNewBinding;
+   char *pcKeySave;
+   size_t hash;
+
+   /* ensures no null input where unexpected.
+      pvValue can be NULL */
    assert(oSymTable != NULL);
    assert(pcKey != NULL);
 
    /* checks if oSymTable already contains pcKey */
-   if(!SymTable_contains(oSymTable, pcKey)){
-      struct Binding *psNewBinding;
-      char *pcKeySave;
-      size_t hash;
-
-      /* allocates memory for which the new Binding will reside */
-      psNewBinding = (struct Binding*)malloc(sizeof(struct Binding));
-
-      /* checks to see if malloc failed */
-      if (psNewBinding == NULL)
-         /* returns 0 representing that their was
-            insufficeint memory */
-         return 0;
-
-      /* allocates memory for which the defensive key will reside */
-      pcKeySave = malloc(strlen(pcKey) + 1);
-
-      /* checks to see if malloc failed */
-      if (pcKeySave == NULL)
-         /* returns 0 representing that their was
-            insufficeint memory */
-         return 0;
-
-      /* copies the key into allocated memory allowing a
-         defensive copy to be stored */
-      strcpy(pcKeySave, pcKey);
-
-      /* increments the number of inputs stored in oSymTable */
-      oSymTable->tableInputs++;
-
-
-      /* checks if oSymtable needs to be resized. This also checks to
-         see if we have reached the max number of buckets
-         preventing resized from being called for every binding
-         inserted after the table has already reached its max length */
-      if ((oSymTable->tableInputs
-           > bucketArray[oSymTable->bucketIndex])
-          && ((size_t)oSymTable->bucketIndex != numBucketCounts - 1)){
-         oSymTable = SymTable_resize(oSymTable);
-      }
-
-      /* calculates the hash value to determine which bucket
-         the binding will be inserted in */
-      hash = SymTable_hash(pcKey,
-                           bucketArray[oSymTable->bucketIndex]);
-
-      /* saves the value and defensive key into the binding */
-      psNewBinding->pvValue = pvValue;
-      psNewBinding->pcKey = pcKeySave;
-
-      /* sets the first binding within the oSymTable bucket
-         to be the binding  just created */
-      psNewBinding->psNextBinding = oSymTable->buckets[hash];
-      oSymTable->buckets[hash] = psNewBinding;
-
-      return 1;
+   if(SymTable_contains(oSymTable, pcKey)){
+      /* returns 0 representing that pcKey was already found within
+         oSymTable so no new binding was added*/
+      return 0;
    }
-   /* returns 0 representing that pcKey was already found within
-      oSymTable so no new binding was added*/
-   return 0;
+
+   /* allocates memory for which the new Binding will reside */
+   psNewBinding = (struct Binding*)malloc(sizeof(struct Binding));
+
+   /* checks to see if malloc failed */
+   if (psNewBinding == NULL)
+      /* returns 0 representing that their was
+         insufficeint memory */
+      return 0;
+
+   /* allocates memory for which the defensive key will reside */
+   pcKeySave = malloc(strlen(pcKey) + 1);
+
+   /* checks to see if malloc failed */
+   if (pcKeySave == NULL)
+      /* returns 0 representing that their was
+         insufficeint memory */
+      return 0;
+
+   /* copies the key into allocated memory allowing a
+      defensive copy to be stored */
+   strcpy(pcKeySave, pcKey);
+
+   /* increments the number of inputs stored in oSymTable */
+   oSymTable->tableInputs++;
+
+   /* checks if oSymtable needs to be resized. This also checks to
+      see if we have reached the max number of buckets
+      preventing SymTable_resize from being called for every binding
+      inserted after the table has already reached its max length */
+   if ((oSymTable->tableInputs
+        > bucketArray[oSymTable->bucketIndex])
+       && ((size_t)oSymTable->bucketIndex != numBucketCounts - 1)){
+      oSymTable = SymTable_resize(oSymTable);
+   }
+
+   /* calculates the hash value to determine which bucket
+      the binding will be inserted in */
+   hash = SymTable_hash(pcKey,
+                        bucketArray[oSymTable->bucketIndex]);
+
+   /* saves the value and defensive key into the binding */
+   psNewBinding->pvValue = pvValue;
+   psNewBinding->pcKey = pcKeySave;
+
+   /* sets the first binding within the oSymTable bucket
+      to be the binding just created */
+   psNewBinding->psNextBinding = oSymTable->buckets[hash];
+   oSymTable->buckets[hash] = psNewBinding;
+
+   return 1;
 }
 
 void *SymTable_replace(SymTable_T oSymTable, const char *pcKey,
@@ -293,7 +280,8 @@ void *SymTable_replace(SymTable_T oSymTable, const char *pcKey,
    struct Binding *psCurrentBinding;
    size_t hash;
 
-   /* ensures no null input where unexpected */
+   /* ensures no null input where unexpected.
+      pvValue can be NULL */
    assert(oSymTable != NULL);
    assert(pcKey != NULL);
 
@@ -440,7 +428,8 @@ void SymTable_map(SymTable_T oSymTable,
    /* for loop variable */
    size_t i;
 
-   /* ensures no null input where unexpected */
+   /* ensures no null input where unexpected.
+      pvExtra can be NULL */
    assert(oSymTable != NULL);
    assert(pfApply != NULL);
 

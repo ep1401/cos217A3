@@ -72,11 +72,11 @@ symtablelist.c line 87: medium priority:
 Do you want to validate 'pvValue' through an assert?
 I dissagree with this warning becuase pvValue can be NULL
 
-symtablelist.c line 140: medium priority:
+symtablelist.c line 141: medium priority:
 Do you want to validate 'pvValue' through an assert?
 I dissagree with this warning becuase pvValue can be NULL
 
-symtablelist.c line 266: medium priority:
+symtablelist.c line 268: medium priority:
 Do you want to validate 'pvExtra' through an assert?
 I dissagree with this warning becuase pvExtra can be NULL
 
@@ -86,12 +86,7 @@ What warnings does splint generate on symtablehash.c, and what are your
 disagreements with them? Copy the splint warnings here, and express your
 disagreement after each warning. If there are no warnings, then write
 "None."
-symtablehash.c: (in function SymTable_resize)
-symtablehash.c:119:44 Value newBucket[] used before definition
-An rvalue is used that may not be initialized to a value on some
-execution path (Use -usedef to inhibit warning).
-I dissagree with warning because newBucket is initialized for each
-index within a for loop above the call
+None
 
 
 ------------------------------------------------------------------------
@@ -99,15 +94,15 @@ What warnings does critTer generate on symtablehash.c, and what are your
 disagreements with them? Copy the critTer warnings here, and express
 your disagreement after each warning. If there are no warnings, then
 write "None."
-symtablelist.c line 211: medium priority:
+symtablelist.c line 209: medium priority:
 Do you want to validate 'pvValue' through an assert?
 I dissagree with this warning becuase pvValue can be NULL
 
-symtablelist.c line 277: medium priority:
+symtablelist.c line 279: medium priority:
 Do you want to validate 'pvValue' through an assert?
 I dissagree with this warning becuase pvValue can be NULL
 
-symtablelist.c line 423: medium priority:
+symtablelist.c line 426: medium priority:
 Do you want to validate 'pvExtra' through an assert?
 I dissagree with this warning becuase pvExtra can be NULL
 
@@ -128,7 +123,7 @@ The linked list implementation with:
 The non-expanding hash table implementation with:
 -- 50 bindings consumed 0.000000 seconds.
 -- 500 bindings consumed 0.000000 seconds.
--- 5000 bindings consumed 0.014781 seconds.
+-- 5000 bindings consumed 0.009635 seconds.
 -- 50000 bindings consumed 0.439478 seconds.
 -- 500000 bindings consumed 79.186600 seconds.
 
@@ -137,4 +132,4 @@ The expanding hash table implementation with:
 -- 500 bindings consumed 0.000000 seconds.
 -- 5000 bindings consumed 0.011536 seconds.
 -- 50000 bindings consumed 0.132679 seconds.
--- 500000 bindings consumed 1.745617 seconds.
+-- 500000 bindings consumed 1.842261 seconds.

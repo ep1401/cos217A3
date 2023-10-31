@@ -85,7 +85,8 @@ size_t SymTable_getLength(SymTable_T oSymTable){
 
 int SymTable_put(SymTable_T oSymTable, const char *pcKey,
                  const void *pvValue){
-   /* ensures no null input where unexpected */
+   /* ensures no null input where unexpected.
+      pvValue can be NULL */
    assert(oSymTable != NULL);
    assert(pcKey != NULL);
 
@@ -140,7 +141,8 @@ void *SymTable_replace(SymTable_T oSymTable, const char *pcKey,
                        const void *pvValue){
    struct Binding *psCurrentBinding;
 
-   /* ensures no null input where unexpected */
+   /* ensures no null input where unexpected.
+      pvValue can be NULL */
    assert(oSymTable != NULL);
    assert(pcKey != NULL);
 
@@ -266,7 +268,8 @@ void SymTable_map(SymTable_T oSymTable,
                   const void *pvExtra){
    struct Binding *psCurrentBinding;
 
-   /* ensures no null input where unexpected */
+   /* ensures no null input where unexpected.
+      pvExtra can be NULL */
    assert(oSymTable != NULL);
    assert(pfApply != NULL);
 
