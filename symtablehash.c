@@ -11,8 +11,8 @@ static const size_t bucketArray[] = {509, 1021, 2039, 4093, 8191,
    16381, 32749, 65521};
 
 /* stores the length of bucketArray */
-static const size_t numBucketCounts =
-   sizeof(bucketArray)/sizeof(bucketArray[0]);
+static const size_t numBucketCounts = sizeof(bucketArray)
+   /sizeof(bucketArray[0]);
 
 /* Each item is stored in a Binding.
    Bindings are linked to form a Table*/
@@ -71,8 +71,8 @@ static size_t SymTable_hash(const char *pcKey, size_t uBucketCount) {
    equal to the value located in the next increased index of
    bucketArray. oSymTable will be modified to include the
    new buckets with all of its previous bindings being
-   rehashed. This modified oSymTable will be returned */
-static SymTable_T SymTable_resize(SymTable_T oSymTable) {
+   rehashed. No value will be returned */
+static void SymTable_resize(SymTable_T oSymTable) {
    struct Binding **newBucket;
    struct Binding *psCurrentBinding;
    struct Binding *psNextBinding;
@@ -90,7 +90,7 @@ static SymTable_T SymTable_resize(SymTable_T oSymTable) {
       beneficial to also include here to ensure that we
       do not try to access an array index that we do not have. */
    if ((size_t)oSymTable->bucketIndex == numBucketCounts - 1) {
-      return oSymTable;
+      return;
    }
 
    /* gets the new size of the oSymTable and increments
@@ -104,7 +104,7 @@ static SymTable_T SymTable_resize(SymTable_T oSymTable) {
 
    /* checks to see if calloc failed */
    if (newBucket == NULL)
-      return NULL;
+      return;
 
    /* iterates through oSymTable until the end is reached. Need
       to subtract one because bucketIndex has alread been
@@ -133,9 +133,6 @@ static SymTable_T SymTable_resize(SymTable_T oSymTable) {
 
    /* sets oSymTable->buckets to be the new buckets created */
    oSymTable->buckets = newBucket;
-
-   return oSymTable;
-
 }
 
 SymTable_T SymTable_new(void){
@@ -255,7 +252,8 @@ int SymTable_put(SymTable_T oSymTable, const char *pcKey,
    if ((oSymTable->tableInputs
         > bucketArray[oSymTable->bucketIndex])
        && ((size_t)oSymTable->bucketIndex != numBucketCounts - 1)){
-      oSymTable = SymTable_resize(oSymTable);
+      /* attempts to resize if enough memory is availiable */
+      SymTable_resize(oSymTable);
    }
 
    /* calculates the hash value to determine which bucket
