@@ -108,10 +108,12 @@ int SymTable_put(SymTable_T oSymTable, const char *pcKey,
       pcKeySave = malloc(strlen(pcKey) + 1);
 
       /* checks to see if malloc failed */
-      if (pcKeySave == NULL)
+      if (pcKeySave == NULL) {
+         free(psNewBinding);
          /* returns 0 representing that their was
             insufficeint memory */
          return 0;
+      }
 
       /* copies the key into allocated memory allowing a
          defensive copy to be stored */
