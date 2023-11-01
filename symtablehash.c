@@ -71,7 +71,7 @@ static size_t SymTable_hash(const char *pcKey, size_t uBucketCount) {
    equal to the value located in the next increased index of
    bucketArray. oSymTable will be modified to include the
    new buckets with all of its previous bindings being
-   rehashed. No value will be returned */
+   rehashed. oSymTable will be returned */
 static SymTable_T SymTable_resize(SymTable_T oSymTable) {
    struct Binding **newBucket;
    struct Binding *psCurrentBinding;
@@ -93,9 +93,8 @@ static SymTable_T SymTable_resize(SymTable_T oSymTable) {
       return oSymTable;
    }
 
-   /* gets the new size of the oSymTable and increments
-      bucketIndex to be the index of the new size */
-   newSize = bucketArray[++oSymTable->bucketIndex];
+   /* gets the new size of the oSymTable */
+   newSize = bucketArray[oSymTable->bucketIndex + 1];
 
    /* intilizes the size of newBucket to fit the
       the new number of buckets and sets all bindings to NULL */
@@ -106,10 +105,8 @@ static SymTable_T SymTable_resize(SymTable_T oSymTable) {
    if (newBucket == NULL)
       return oSymTable;
 
-   /* iterates through oSymTable until the end is reached. Need
-      to subtract one because bucketIndex has alread been
-      incrmented */
-   for (i = 0; i < bucketArray[oSymTable->bucketIndex - 1]; i++) {
+   /* iterates through oSymTable until the end is reached. */
+   for (i = 0; i < bucketArray[oSymTable->bucketIndex]; i++) {
       for (psCurrentBinding = oSymTable->buckets[i];
            psCurrentBinding != NULL;
            psCurrentBinding = psNextBinding) {
@@ -128,6 +125,10 @@ static SymTable_T SymTable_resize(SymTable_T oSymTable) {
          newBucket[hash] = psCurrentBinding;
       }
    }
+
+   /* increments bucketIndex to be the index of the new size*/
+   oSymTable->bucketIndex++;
+   
    /* frees the old buckets memory */
    free(oSymTable->buckets);
 
