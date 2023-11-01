@@ -72,7 +72,7 @@ static size_t SymTable_hash(const char *pcKey, size_t uBucketCount) {
    bucketArray. oSymTable will be modified to include the
    new buckets with all of its previous bindings being
    rehashed. No value will be returned */
-static void SymTable_resize(SymTable_T oSymTable) {
+static SymTable_T SymTable_resize(SymTable_T oSymTable) {
    struct Binding **newBucket;
    struct Binding *psCurrentBinding;
    struct Binding *psNextBinding;
@@ -90,7 +90,7 @@ static void SymTable_resize(SymTable_T oSymTable) {
       beneficial to also include here to ensure that we
       do not try to access an array index that we do not have. */
    if ((size_t)oSymTable->bucketIndex == numBucketCounts - 1) {
-      return;
+      return oSymTable;
    }
 
    /* gets the new size of the oSymTable and increments
@@ -104,7 +104,7 @@ static void SymTable_resize(SymTable_T oSymTable) {
 
    /* checks to see if calloc failed */
    if (newBucket == NULL)
-      return;
+      return oSymTable;
 
    /* iterates through oSymTable until the end is reached. Need
       to subtract one because bucketIndex has alread been
@@ -133,6 +133,8 @@ static void SymTable_resize(SymTable_T oSymTable) {
 
    /* sets oSymTable->buckets to be the new buckets created */
    oSymTable->buckets = newBucket;
+
+   return oSymTable;
 }
 
 SymTable_T SymTable_new(void){
@@ -253,7 +255,7 @@ int SymTable_put(SymTable_T oSymTable, const char *pcKey,
         > bucketArray[oSymTable->bucketIndex])
        && ((size_t)oSymTable->bucketIndex != numBucketCounts - 1)){
       /* attempts to resize if enough memory is availiable */
-      SymTable_resize(oSymTable);
+      oSymTable = SymTable_resize(oSymTable);
    }
 
    /* calculates the hash value to determine which bucket
